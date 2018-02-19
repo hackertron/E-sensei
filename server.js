@@ -5,7 +5,10 @@ var mongoose = require('mongoose');
 
 var app = express();
 
-mongoose.connect('your url here ', function(err){
+var secret = require('./config/secret');
+
+
+mongoose.connect(secret.database, function(err){
   if(err){
     console.log(err);
   } else {
@@ -17,14 +20,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(morgan('dev'));
 
-app.get('/', function(req, res, next){
-  res.json('home');
-})
+require('./routes/main')(app);
 
-app.listen(8080, function(err){
+app.listen(secret.port, function(err){
   if(err){
     console.log(err);
   } else {
-    console.log("listening on 8080 ");
+    console.log("listening on " + secret.port);
   }
 });
