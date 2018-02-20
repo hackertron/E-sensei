@@ -5,12 +5,15 @@ var mongoose = require('mongoose');
 var ejs = require('ejs');
 var engine = require('ejs-mate');
 var passport = require('passport');
-var app = express();
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var MongoStore = require('connect-mongo')(session);
+var flash = require('express-flash');
+
+var app = express();
 
 var secret = require('./config/secret');
+
 
 
 mongoose.connect(secret.database, function(err){
@@ -32,13 +35,18 @@ app.use(session({
   resave: true,
   saveUnitialized: true,
   secret: secret.secretKey,
-  store: new MongoStore({url: secret.database, autoReconnect: true});
-  
+  store: new MongoStore({url: secret.database, autoReconnect: true})
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
+app.use(function(req, res, next){
+  res.locals.user = req.user;
+  next();
+});
 
 require('./routes/main')(app);
+require('./routes/user')(app);
 
 app.listen(secret.port, function(err){
   if(err){
